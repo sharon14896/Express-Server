@@ -1,30 +1,34 @@
-//יבוא ויצוא באקספרס ללא אקמה סקריפט
-//const express=require("express");
-//export =num=50
-
 import express from "express";
 //הרצת הפונקציה שמחזירה את היכולות של האקספרס 
 const app = express();
 
 //הגדרת הפורט שאליו מאזינים
 const port=process.env.PORT||3000;
-//סוגי בקשות 
-//"GET ,POST,PUT,DELETE,PATCH"
-//GET-בקשה לקבלת מידע
-//POST-בקשה להכנסת מידע
-//PUT-בקשה לעריכת מידע
-//DELETE-בקשה למחיקת מידע
-//PATCH-בקשה לעדכון קטן 
 
-//הקולבק מקבלת שני פרמטרים ריקווסט ורספונס 
-//מהריקוסט נאסף נתונים הקושרים לבקשה
 //מרספונס משתמשים להחזרת של התשובה 
 //ראוט שמחזיר טקסט 
-app.get('/server',(req,res)=>{
-
-    res.send("hello")
+app.get('/color',(req,res)=>{
+    const color=["Black","red","Green","Brown","Pink","Purple","Blue","Orange"]
+    res.json(color)
+})
+app.get('/toys',(req,res)=>{
+    const toys=[
+         {Name:"Ball" ,Price: 5}
+        ,{Name:"Bicycle" ,Price: 512}
+        ,{Name:"Teddybear" ,Price: 155}
+        ,{Name:"Doll" ,Price: 222}
+        ,{Name:"car" ,Price: 333}]
+    res.send(toys)
+})
+app.get('/name',(req,res)=>{
+    const name=["sharon","yarin","michael","Ben","Effi","Elad","Amit","Shlomi"]
+    res.json(name)
 })
 
+
+
+import userRoute from "./UserRoutes.js"
+app.use('/user',userRoute)
 
 app.get('*',(req,res)=>{
 
