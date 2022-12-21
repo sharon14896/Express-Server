@@ -1,40 +1,17 @@
-import express from "express";
-//גישה לנתיב תקייה כלשהי
+import express from "express"
+// גישה לנתיב של תיקייה כלשהי
 import path from "path"
-import { routesInit } from "./routes/ConfigRouts.js";
-
+import { routesInit } from "./routes/configRoutes.js";
 
 const app = express();
-//נותן את הגישה לתגובה של הגייסון מהשרת 
-app.use=express();
+// נותן את הגישה לתגובה של גייסון מהשרת
+app.use(express.json());
 
-//הגדרת הפורט שאליו מאזינים
-const port=process.env.PORT||3000;
+// server running on port:
+const port = process.env.PORT || 3000;
 
 routesInit(app)
 
-
-app.listen(port,()=>{
-    console.log(`listenig on ${port}`);
-})
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//פןנקציה להאזנה לפורט 
-app.listen(port,()=>{
-    console.log(`listenig on ${port}`)
+app.listen(port, () => {
+    console.log(`listening on ${port}`)
 })
