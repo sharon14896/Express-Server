@@ -109,8 +109,15 @@ router.delete('/:id',(req,res)=>{
     if(!cake){
         return res.json({msg_err:'Cake not found'})
     }
+    let index;
+    cakes.forEach((cake,i)=>{
+        if(cake.id==id){
+            index=i
+        }
+    });
 
-    cakes.splice(1,get)
+    cakes.splice(index,1)
+    res.json(cakes)
 })
 
 export default router;
