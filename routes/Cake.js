@@ -26,12 +26,18 @@ const router=express.Router()
       ];
 
 router.get('/',(req,res)=>{
-    res.json(cakes)
+    try {
+         res.json(cakes)
+    } catch (error) {
+        res.status(500).json(err)   
+    }
+    
 })
 
 //ראוטר עבור חיפוש עוגות לפי קטגוריות
 router.get('/category/:category',(req,res)=>{
-    //איסוף פארם מהכתובת
+    try {
+         //איסוף פארם מהכתובת
     const category=req.params.category;
     console.log(category);
     //פילטר עבור קטגוריה שנבחרה בפארם
@@ -39,12 +45,17 @@ router.get('/category/:category',(req,res)=>{
     //אם המערך ריק זאת אומרת שלא קיים קטגוריה כזו
     if(!filterdCaked.length)
     //נחזיר גייסון עם הודעה מתאימה בנוסף נוסיף ריטארן בשביל שלא יהיו התנגשויות גייסונים
-     return res.json({msg:`Category${category}not found!`})
+     return res.status.json(401)({msg_err:`Category${category}not found!`})
     res.json(filterdCaked)
+    } catch (error) {
+         res.status(500).json(err)   
+    }
+   
 })
 
 router.get('/byPrice',(req,res)=>{
-    //איוסף קווארי מכתובת
+    try {
+         //איוסף קווארי מכתובת
     const min=req.query.min
     const max=req.query.max
     //ייצור מערך זמני לפילטור
@@ -65,46 +76,61 @@ router.get('/byPrice',(req,res)=>{
     }
     //אם מינ גדול ממקס נחזיר הודעה בהתאם
     else if(min>max){
-        return res.json({msg:'cannot find when minimun bigger ther maximun'})
+        return res.status.json(401)({msg_err:'cannot find when minimun bigger ther maximun'})
     }
     //נחזיר את המערך המופלטר לפי הקווארי
     filterdCakedByPrice=cakes.filter(cakes=>cakes.price>=min&&cakes.price<=max)
     res.json(filterdCakedByPrice)
+    } catch (error) {
+         res.status(500).json(err)   
+    }
+   
 })
 
 router.get('/byId/:id',(req,res)=>{
-    //איסוף פארם
+    try {
+         //איסוף פארם
     const id=req.params.id;
     //פונקציה פיינד מחזירה אובייקט בודד לפי התנאי
     const cake=cakes.find(cakes=>cakes.id==id)
     //אם הפונקציה לא החזירה כלום ניתן הודעה בהתאם
     if(!cake)
-     return res.json({msg:`Cake not found!`})
+     return res.status.json(401)({msg_err:`Cake not found!`})
      //נחזיר את העוגה לפי האיידי מהפארם
     res.json(cake)
+    } catch (error) {
+          res.status(500).json(err)   
+    }
+   
 })
 
 router.post('/',(req,res)=>{
-    const {type,price,category}=req.body
-    const cake = req.body;
-    if(!type,!price,!category)
-    return res.json({msg_err:'type,price,category are requierd'})
-
-    //פעולה שתוודא שרק הערכים שאני רוצה יהיו בבאדי ולא אחרת
-    //לולאה זאת תרוץ על כל מפתח באובייקט 
-    for (const key in cake) {
-        if(key!='type' && key!='price' && key!='category')
-        return res.json({msg_err:'only type,price and category are requierd'})
+    try {
+        const {type,price,category}=req.body
+        const cake = req.body;
+        if(!type,!price,!category)
+        return res.json({msg_err:'type,price,category are requierd'})
+    
+        //פעולה שתוודא שרק הערכים שאני רוצה יהיו בבאדי ולא אחרת
+        //לולאה זאת תרוץ על כל מפתח באובייקט 
+        for (const key in cake) {
+            if(key!='type' && key!='price' && key!='category')
+            return res.json({msg_err:'only type,price and category are requierd'})
+        }
+        //מוסיף שדה אי די כעורך המערך +1 
+        cake.id=cakes.length + 1
+        //מוסיף את העוגה למערך של העוגות
+        cakes.push(cake)
+        res.json({msg:'cake add',cake})
+    } catch (error) {
+        res.status(500).json(err) 
     }
-    //מוסיף שדה אי די כעורך המערך +1 
-    cake.id=cakes.length + 1
-    //מוסיף את העוגה למערך של העוגות
-    cakes.push(cake)
-    res.json({msg:'cake add',cake})
+   
 })
 
 router.delete('/:id',(req,res)=>{
-    const id =req.params.id
+    try {
+        const id =req.params.id
     const cake=cakes.find(cakes=>cakes.id==id)
     if(!cake){
         return res.json({msg_err:'Cake not found'})
@@ -118,6 +144,10 @@ router.delete('/:id',(req,res)=>{
 
     cakes.splice(index,1)
     res.json(cakes)
+    } catch (error) {
+        res.status(500).json(err) 
+    }
+    
 })
 
 export default router;
