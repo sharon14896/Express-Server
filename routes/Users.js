@@ -1,101 +1,100 @@
 import express from "express";
+import { UserModel } from "../models/userModel.js";
+import { addUserValid, updateUserValid } from "../validations/UserValidation.js";
 
 const router = express.Router();
-const users = [
-    { id: 1, name: "John", age: 30 },
-    { id: 2, name: "Jane", age: 25 },
-    { id: 3, name: "Bob", age: 35 },
-    { id: 4, name: "Alice", age: 28 },
-    { id: 5, name: "Mike", age: 32 },
-    { id: 6, name: "Sarah", age: 27 },
-    { id: 7, name: "Chris", age: 29 },
-    { id: 8, name: "Maggie", age: 26 },
-    { id: 9, name: "Tom", age: 31 },
-    { id: 10, name: "Emily", age: 24 },
-    { id: 11, name: "Jason", age: 33 },
-    { id: 12, name: "Laura", age: 29 },
-    { id: 13, name: "Richard", age: 28 },
-    { id: 14, name: "Ashley", age: 25 },
-    { id: 15, name: "Andrew", age: 34 },
-    { id: 16, name: "Jessica", age: 27 },
-    { id: 17, name: "Michael", age: 32 },
-    { id: 18, name: "Samantha", age: 30 },
-    { id: 19, name: "Kevin", age: 29 },
-    { id: 20, name: "Emily", age: 24 },
-    { id: 21, name: "David", age: 35 },
-    { id: 22, name: "Ashley", age: 26 },
-    { id: 23, name: "Robert", age: 31 },
-    { id: 24, name: "Sara", age: 29 },
-    { id: 25, name: "Chris", age: 28 }
-  ];
+router.get('/', async(req, res) => {//הצגת כל המשתמשים 
+    try {
+        const users = await UserModel.find({})
+        res.json(users);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({
+            msg_err: err
+        });
 
-router.get('/', (req, res) => {
-    res.json(users);
+    }
 })
 
-router.get('/byId/:id',(req,res)=>{
-    const id=req.params.id;
-    const user=users.find(users=>users.id==id)
-    if(!user)
-    return res.json({msg:`User not found!`})
-   res.json(user)
-})
-
-router.get('/byAge',(req,res)=>{
-    const min=req.query.min;
-    const max=req.query.max;
-    let usersByAge=[];
-    if(!min&&!max){
-        return res.json(users)
+router.post ('/',async (req,res)=>{//הוספת משתמש
+    try {
+        const user=req.body
+        const validation =addUserValid(user)
+        if(validation.error){
+        return res.status(400).json({msg_err:validation.error.details})
     }
-    else if(min&&!max){
-        usersByAge=users.filter(users=>users.age>=min)
-        return res.json(usersByAge)
-    }
-    else if(!min&&max){
-        usersByAge=users.filter(users=>users.age<=max)
-        return res.json(usersByAge)
-    }
-    else if(min>max){
-        return res.json({msg:'It doesnt make sense that the minimum is greater than the maximum'})
-    }
-    usersByAge=users.filter(users=>users.age>=min&&users.age<=max)
-    res.json(usersByAge)
-})
-
-router.post('/',(req,res)=>{
-    const {name,age}=req.body;
-    const user=req.body;
-    if(!name,!age)
-    return res.json({msg_err:'name , age are requierd'});
-    for (const key in user) {
-        if(key!='name' && key!='age' )
-        return res.json({msg_err:'only name and age are requierd'})
-    }
-    user.id=users.length +1 
-    users.push(user);
-    res.json({msg:'The user was successfully added!',user})
-})
-
-router.delete('/:id',(req,res)=>{
-    const id =req.params.id
-    const user=users.find(cakes=>cakes.id==id)
-    if(!user){
-        return res.json({msg_err:'user not found'})
-    }
-    let index;
-    users.forEach((user,i)=>{
-        if(user.id==id){
-            index=i
+         const data=await UserModel.create(user)
+         data.save()
+        res.json({msg:"Add"})
+    } catch (error) {
+        if(err.code== 11000){
+        return res.status(500).json({msg_err:'Name is alredy exist'})
         }
-    });
-
-    users.splice(index,1)
-    res.json(user)
-})
+        res.status(500).json({msg_err:err})
+    }
+    })
 
 
+    router.put('/byName/:name', async(req, res) => {//עדכון משתמש לפי שם
 
+        try {
+            const name = req.params.name
+            const user = req.body
+            const validation = updateUserValid(user)
+            if (validation.error) {
+                return res.status(400).json({ msg_err: validation.error.details })
+            }
+            const data = await UserModel.updateOne({ name: name }, user)
+            console.log(data);
+            if (data.matchedCount != 1) {
+                return res.status(401).json({ msg_err: "user not exist!" })
+            }
+            if (data.modifiedCount == 1 && data.matchedCount == 1) {
+                return res.status(200).json({ msg: 'user updated successfully' })
+            }
+    
+            return res.status(200).json({ msg: 'user without any updated..' })
+    
+        } catch (err) {
+            console.log(err)
+            res.status(500).json({ msg_err: err })
+        }
+    })
+
+
+    router.delete('/byName/:name', async(req, res) => {//מחיקת משתמש לפי שם
+        try {
+            const name = req.params.name
+    
+            const user = await UserModel.findOne({ name: name })
+            if (!user) {
+                return res.status(401).json({ msg_err: "user not exist!" })
+            }
+            const data = await UserModel.deleteOne({ name: name })
+            if (data.deletedCount != 1) {
+                return res.status(500).json({ msg: 'user not deleted' })
+            }
+    
+            return res.status(200).json({ msg: 'user deleted successfully' })
+    
+        } catch (err) {
+            console.log(err)
+            res.status(500).json({ msg_err: err })
+        }
+    })
+
+    router.get('/:name', async(req, res) => {//הצגת משתמש לפי שם
+        try {
+            const user = await UserModel.findOne({ name: req.params.name })
+            if (!user) {
+                return res.status(401).json({ msg_err: "user not exist!" })
+            }
+            res.json(user)
+        } catch (err) {
+            console.log(err)
+            res.status(500).json({ msg_err: err })
+        }
+    })
 
 
 

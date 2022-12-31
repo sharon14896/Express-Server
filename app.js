@@ -1,7 +1,9 @@
 import express from "express"
 // גישה לנתיב של תיקייה כלשהי
 import path from "path"
+import { connectToMongoDB } from "./db/mongoConnect.js";
 import { routesInit } from "./routes/configRoutes.js";
+connectToMongoDB();
 
 const app = express();
 // נותן את הגישה לתגובה של גייסון מהשרת
